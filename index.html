@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Min videohemsida</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Enkel klient-sidig låsning -->
+  <div id="auth-overlay" class="auth-overlay" aria-hidden="false">
+    <div class="auth-box" role="dialog" aria-labelledby="auth-title">
+      <h2 id="auth-title">Ange kod för åtkomst</h2>
+      <p>Skriv in koden för att visa sidan.</p>
+      <input id="auth-input" type="password" placeholder="Kod" aria-label="Kod" />
+      <div class="auth-actions">
+        <button id="auth-submit">Öppna</button>
+      </div>
+      <p id="auth-message" class="auth-message" aria-live="polite"></p>
+      <p class="auth-note"><strong>Observera:</strong> Detta är endast ett enkelt klient‑sidigt skydd och inte säkert för känsligt innehåll.</p>
+    </div>
+  </div>
+
+  <div id="site-content" class="site-hidden" aria-hidden="true">
+    <header class="site-header">
+      <div class="header-inner">
+        <h1>Min videohemsida</h1>
+        <nav>
+          <a class="site-link" href="index.html" target="_blank" rel="noopener">Öppna sidan</a>
+        </nav>
+      </div>
+      <p class="intro">Här kan du lägga in videofiler i rektangulära kort. Sidan är en enkel en-sidig layout på svenska och är mobilvänlig.</p>
+    </header>
+
+    <main class="container">
+      <div id="cards">
+        <!-- Ett par tomma exempelkort (utan videofiler) -->
+        <article class="card">
+          <div class="card-header">
+            <input class="card-title" value="Video 1 — Rubrik" aria-label="Titel för kort 1" />
+            <label class="upload-label">
+              <input type="file" accept="video/*" class="video-input" />
+              Ladda upp video
+            </label>
+          </div>
+          <div class="video-wrap">
+            <video controls preload="metadata" class="video-player" aria-label="Video 1">
+              Din webbläsare stödjer inte videoelementet.
+            </video>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <input class="card-title" value="Video 2 — Rubrik" aria-label="Titel för kort 2" />
+            <label class="upload-label">
+              <input type="file" accept="video/*" class="video-input" />
+              Ladda upp video
+            </label>
+          </div>
+          <div class="video-wrap">
+            <video controls preload="metadata" class="video-player" aria-label="Video 2">
+              Din webbläsare stödjer inte videoelementet.
+            </video>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="controls">
+        <button id="add-card">Lägg till nytt kort</button>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>Instruktion: Klicka "Ladda upp video" på ett kort för att välja en videofil från din dator. Videon spelas upp direkt i kortet i din webbläsare (filerna skickas inte någonstans automatiskt).</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
