@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Enkel klient-sidig låsning -->
   <div id="auth-overlay" class="auth-overlay" aria-hidden="false">
     <div class="auth-box" role="dialog" aria-labelledby="auth-title">
       <h2 id="auth-title">Ange kod för åtkomst</h2>
@@ -41,7 +40,7 @@
           </div>
 
           <!-- Quick icon menu -->
-          <div class="quick-menu-wrapper">
+          <div class="quick-menu-wrapper" id="quick-wrapper">
             <button id="quick-menu-btn" class="quick-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Snabbmeny företag">
               <!-- simple icon -->
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -55,7 +54,7 @@
 
         </div>
       </div>
-      <p class="intro">Här kan du lägga in videofiler i rektangulära kort. Klicka ett företag i menyn för att hoppa till dess sektion. Sidan är mobilvänlig.</p>
+      <p class="intro">Här kan du lägga in videofiler i rektangulära kort. Klicka ett företag i menyn för att hoppa till dess sektion eller öppna företagets webb om en länk är angiven.</p>
     </header>
 
     <main class="container">
