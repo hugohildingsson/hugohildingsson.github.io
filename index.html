@@ -24,56 +24,48 @@
   <div id="site-content" class="site-hidden" aria-hidden="true">
     <header class="site-header">
       <div class="header-inner">
-        <h1>Min videohemsida</h1>
-        <nav>
-          <a class="site-link" href="index.html" target="_blank" rel="noopener">Öppna sidan</a>
-        </nav>
+        <h1 tabindex="-1">Min videohemsida</h1>
+
+        <div class="right-controls">
+          <nav class="company-nav" aria-label="Företagsmeny">
+            <ul id="company-menu" class="company-menu"></ul>
+            <button id="add-company" class="btn-link">+ Lägg till företag</button>
+          </nav>
+
+          <div class="bg-control">
+            <label class="upload-bg">
+              Välj bakgrund
+              <input id="bg-input" type="file" accept="image/*" />
+            </label>
+            <button id="clear-bg" class="btn-link">Ta bort bakgrund</button>
+          </div>
+
+          <!-- Quick icon menu -->
+          <div class="quick-menu-wrapper">
+            <button id="quick-menu-btn" class="quick-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Snabbmeny företag">
+              <!-- simple icon -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M3 6h18M3 12h18M3 18h18" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <ul id="quick-menu" class="quick-menu" role="menu" aria-label="Företagslänkar">
+              <!-- Populeras av script.js -->
+            </ul>
+          </div>
+
+        </div>
       </div>
-      <p class="intro">Här kan du lägga in videofiler i rektangulära kort. Sidan är en enkel en-sidig layout på svenska och är mobilvänlig.</p>
+      <p class="intro">Här kan du lägga in videofiler i rektangulära kort. Klicka ett företag i menyn för att hoppa till dess sektion. Sidan är mobilvänlig.</p>
     </header>
 
     <main class="container">
-      <div id="cards">
-        <!-- Ett par tomma exempelkort (utan videofiler) -->
-        <article class="card">
-          <div class="card-header">
-            <input class="card-title" value="Video 1 — Rubrik" aria-label="Titel för kort 1" />
-            <label class="upload-label">
-              <input type="file" accept="video/*" class="video-input" />
-              Ladda upp video
-            </label>
-          </div>
-          <div class="video-wrap">
-            <video controls preload="metadata" class="video-player" aria-label="Video 1">
-              Din webbläsare stödjer inte videoelementet.
-            </video>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-header">
-            <input class="card-title" value="Video 2 — Rubrik" aria-label="Titel för kort 2" />
-            <label class="upload-label">
-              <input type="file" accept="video/*" class="video-input" />
-              Ladda upp video
-            </label>
-          </div>
-          <div class="video-wrap">
-            <video controls preload="metadata" class="video-player" aria-label="Video 2">
-              Din webbläsare stödjer inte videoelementet.
-            </video>
-          </div>
-        </article>
-
-      </div>
-
-      <div class="controls">
-        <button id="add-card">Lägg till nytt kort</button>
+      <div id="companies">
+        <!-- Företagssektioner skapas dynamiskt -->
       </div>
     </main>
 
     <footer class="site-footer">
-      <p>Instruktion: Klicka "Ladda upp video" på ett kort för att välja en videofil från din dator. Videon spelas upp direkt i kortet i din webbläsare (filerna skickas inte någonstans automatiskt).</p>
+      <p>Instruktion: Klicka företagsnamnet för att hoppa till dess sektion. Inuti varje sektion kan du lägga till videokort för det företaget.</p>
     </footer>
   </div>
 
