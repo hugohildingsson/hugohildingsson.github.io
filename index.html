@@ -4,17 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>LEGACY UF CRM</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=legacy-3" />
 </head>
 <body>
   <div id="auth-overlay" class="auth-overlay" aria-hidden="false">
     <div class="auth-box" role="dialog" aria-labelledby="auth-title">
-      <h2 id="auth-title">Ange kod för åtkomst</h2>
-      <p>Skriv in koden för att visa sidan.</p>
+      <div class="auth-mini-logo">LEGACY <b>UF</b></div>
+      <h2 id="auth-title">Logga in</h2>
+      <p>Skriv in koden för att öppna CRM-systemet.</p>
       <input id="auth-input" type="password" placeholder="Kod" aria-label="Kod" />
-      <div class="auth-actions"><button id="auth-submit">Öppna</button></div>
+      <div class="auth-actions"><button id="auth-submit">Öppna CRM</button></div>
       <p id="auth-message" class="auth-message" aria-live="polite"></p>
-      <p class="auth-note"><strong>Observera:</strong> Detta är endast ett enkelt klient-sidigt skydd och inte säkert för känsliga kunduppgifter.</p>
+      <p class="auth-note">Klient-sidigt skydd – använd inte för känsliga uppgifter.</p>
     </div>
   </div>
 
@@ -22,65 +23,26 @@
     <header class="site-header">
       <div class="header-inner">
         <div class="brand-wrap">
-          <div class="brand-mark" aria-hidden="true">
-            <span class="mark-left"></span>
-            <span class="mark-right"></span>
-          </div>
-          <div class="brand-wordmark" aria-label="Legacy UF">
-            <span class="brand-line">LEGACY</span>
-            <span class="brand-sub">UF</span>
-          </div>
+          <div class="brand-mark" aria-hidden="true"><span class="mark-left"></span><span class="mark-right"></span></div>
+          <div class="brand-wordmark" aria-label="Legacy UF"><span class="brand-line">LEGACY</span><span class="brand-sub">UF</span></div>
         </div>
-
-        <div class="bg-control">
-          <label class="upload-bg">Välj bakgrund<input id="bg-input" type="file" accept="image/*" /></label>
-          <button id="clear-bg" class="btn-link">Ta bort bakgrund</button>
-        </div>
+        <div class="header-copy"><span class="status-dot"></span><span>CRM DASHBOARD</span><strong>Kontakter &amp; kunder</strong></div>
+        <div class="bg-control"><label class="upload-bg">Välj bakgrund<input id="bg-input" type="file" accept="image/*" /></label><button id="clear-bg" class="btn-link">Återställ</button></div>
       </div>
     </header>
 
     <main class="container">
-      <section class="stats" aria-label="Sammanfattning">
-        <div class="stat-card"><span id="customer-count">0</span><small>Kunder</small></div>
-        <div class="stat-card"><span id="contact-count">0</span><small>Kontaktpersoner</small></div>
-      </section>
-
+      <div class="page-intro"><div><p class="kicker">LEGACY UF / ÖVERSIKT</p><h1>Din kundöversikt</h1><p class="intro">Samla företag och kontaktpersoner i ett enkelt arbetsflöde.</p></div><div class="intro-badge">LIVE<br><span>2026</span></div></div>
+      <section class="stats" aria-label="Sammanfattning"><div class="stat-card stat-blue"><span id="customer-count">0</span><small>AKTIVA KUNDER</small></div><div class="stat-card"><span id="contact-count">0</span><small>KONTAKTPERSONER</small></div></section>
       <section class="crm-grid">
-        <div class="panel">
-          <h2>Lägg till kund</h2>
-          <form id="customer-form" class="crm-form">
-            <label>Företagsnamn<input id="customer-name" required maxlength="100" placeholder="Exempel AB" /></label>
-            <label>Organisationsnummer<input id="customer-org" maxlength="30" placeholder="556000-0000" /></label>
-            <label>E-post<input id="customer-email" type="email" maxlength="120" placeholder="info@exempel.se" /></label>
-            <label>Telefon<input id="customer-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label>
-            <button class="primary-button" type="submit">+ Lägg till kund</button>
-          </form>
-        </div>
-        <div class="panel">
-          <h2>Lägg till kontaktperson</h2>
-          <form id="contact-form" class="crm-form">
-            <label>Namn<input id="contact-name" required maxlength="100" placeholder="Anna Andersson" /></label>
-            <label>Kund<select id="contact-customer" required><option value="">Välj kund</option></select></label>
-            <label>E-post<input id="contact-email" type="email" maxlength="120" placeholder="anna@exempel.se" /></label>
-            <label>Telefon<input id="contact-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label>
-            <label>Roll<input id="contact-role" maxlength="80" placeholder="Inköpschef" /></label>
-            <button class="primary-button" type="submit">+ Lägg till kontakt</button>
-          </form>
-        </div>
+        <div class="panel"><div class="panel-label">01 / FÖRETAG</div><h2>Lägg till kund</h2><form id="customer-form" class="crm-form"><label>Företagsnamn<input id="customer-name" required maxlength="100" placeholder="Exempel AB" /></label><label>Organisationsnummer<input id="customer-org" maxlength="30" placeholder="556000-0000" /></label><label>E-post<input id="customer-email" type="email" maxlength="120" placeholder="info@exempel.se" /></label><label>Telefon<input id="customer-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label><button class="primary-button" type="submit">+ Lägg till kund</button></form></div>
+        <div class="panel"><div class="panel-label">02 / PERSON</div><h2>Lägg till kontaktperson</h2><form id="contact-form" class="crm-form"><label>Namn<input id="contact-name" required maxlength="100" placeholder="Anna Andersson" /></label><label>Kund<select id="contact-customer" required><option value="">Välj kund</option></select></label><label>E-post<input id="contact-email" type="email" maxlength="120" placeholder="anna@exempel.se" /></label><label>Telefon<input id="contact-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label><label>Roll<input id="contact-role" maxlength="80" placeholder="Inköpschef" /></label><button class="primary-button" type="submit">+ Lägg till kontakt</button></form></div>
       </section>
-
-      <section class="panel records-panel">
-        <div class="section-heading"><h2>Kunder</h2><input id="search-input" type="search" placeholder="Sök kunder och kontakter..." aria-label="Sök" /></div>
-        <div id="customer-list" class="record-list"></div>
-      </section>
-
-      <section class="panel records-panel">
-        <div class="section-heading"><h2>Kontaktpersoner</h2></div>
-        <div id="contact-list" class="record-list"></div>
-      </section>
+      <section class="panel records-panel"><div class="section-heading"><div><div class="panel-label">REGISTER</div><h2>Kunder</h2></div><input id="search-input" type="search" placeholder="Sök i registret..." aria-label="Sök" /></div><div id="customer-list" class="record-list"></div></section>
+      <section class="panel records-panel"><div class="section-heading"><div><div class="panel-label">REGISTER</div><h2>Kontaktpersoner</h2></div></div><div id="contact-list" class="record-list"></div></section>
     </main>
-    <footer class="site-footer"><p>Data sparas lokalt i den här webbläsaren.</p></footer>
+    <footer class="site-footer"><p>LEGACY UF <span>•</span> Data sparas lokalt i den här webbläsaren.</p></footer>
   </div>
-  <script src="script.js"></script>
+  <script src="script.js?v=legacy-3"></script>
 </body>
 </html>
