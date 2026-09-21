@@ -1,72 +1,11 @@
-const ACCESS_CODE = 'uf202609';
-const STORAGE_KEY = 'crmData';
-const overlay = document.getElementById('auth-overlay');
-const authInput = document.getElementById('auth-input');
-const authSubmit = document.getElementById('auth-submit');
-const authMessage = document.getElementById('auth-message');
-const siteContent = document.getElementById('site-content');
-
-let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"customers":[],"contacts":[]}');
-const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-const id = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-
-function unlockSite() {
-  overlay.style.display = 'none';
-  overlay.setAttribute('aria-hidden', 'true');
-  siteContent.classList.remove('site-hidden');
-  siteContent.setAttribute('aria-hidden', 'false');
-  render();
-}
-function tryUnlock() {
-  if (authInput.value.trim() === ACCESS_CODE) {
-    sessionStorage.setItem('siteUnlocked', '1');
-    unlockSite();
-  } else {
-    authMessage.textContent = 'Fel kod — försök igen.';
-    authInput.value = '';
-    authInput.focus();
-  }
-}
-authSubmit.addEventListener('click', tryUnlock);
-authInput.addEventListener('keydown', event => { if (event.key === 'Enter') tryUnlock(); });
-if (sessionStorage.getItem('siteUnlocked') === '1') unlockSite();
-
-function render() {
-  const query = document.getElementById('search-input').value.trim().toLowerCase();
-  document.getElementById('customer-count').textContent = data.customers.length;
-  document.getElementById('contact-count').textContent = data.contacts.length;
-  const customerSelect = document.getElementById('contact-customer');
-  const selected = customerSelect.value;
-  customerSelect.innerHTML = '<option value="">Välj kund</option>' + data.customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-  customerSelect.value = selected;
-
-  const customers = data.customers.filter(c => `${c.name} ${c.org} ${c.email}`.toLowerCase().includes(query));
-  document.getElementById('customer-list').innerHTML = customers.length ? customers.map(c => `
-    <article class="record"><div><h3>${escapeHtml(c.name)}</h3><p>${escapeHtml(c.org || 'Organisationsnummer saknas')} · ${escapeHtml(c.email || 'Ingen e-post')} · ${escapeHtml(c.phone || 'Inget telefonnummer')}</p></div><button class="delete-button" data-delete-customer="${c.id}">Ta bort</button></article>`).join('') : '<p class="empty-state">Inga kunder ännu.</p>';
-  const contacts = data.contacts.filter(c => `${c.name} ${c.email} ${c.role} ${customerName(c.customerId)}`.toLowerCase().includes(query));
-  document.getElementById('contact-list').innerHTML = contacts.length ? contacts.map(c => `
-    <article class="record"><div><h3>${escapeHtml(c.name)} <span>${escapeHtml(c.role || '')}</span></h3><p>${escapeHtml(customerName(c.customerId))} · ${escapeHtml(c.email || 'Ingen e-post')} · ${escapeHtml(c.phone || 'Inget telefonnummer')}</p></div><button class="delete-button" data-delete-contact="${c.id}">Ta bort</button></article>`).join('') : '<p class="empty-state">Inga kontaktpersoner ännu.</p>';
-}
-function customerName(customerId) { return data.customers.find(c => c.id === customerId)?.name || 'Okänd kund'; }
-
-document.getElementById('customer-form').addEventListener('submit', event => {
-  event.preventDefault();
-  data.customers.push({ id: id(), name: document.getElementById('customer-name').value.trim(), org: document.getElementById('customer-org').value.trim(), email: document.getElementById('customer-email').value.trim(), phone: document.getElementById('customer-phone').value.trim() });
-  save(); event.target.reset(); render();
-});
-document.getElementById('contact-form').addEventListener('submit', event => {
-  event.preventDefault();
-  data.contacts.push({ id: id(), name: document.getElementById('contact-name').value.trim(), customerId: document.getElementById('contact-customer').value, email: document.getElementById('contact-email').value.trim(), phone: document.getElementById('contact-phone').value.trim(), role: document.getElementById('contact-role').value.trim() });
-  save(); event.target.reset(); render();
-});
-document.getElementById('search-input').addEventListener('input', render);
-document.addEventListener('click', event => {
-  const customerId = event.target.dataset.deleteCustomer;
-  const contactId = event.target.dataset.deleteContact;
-  if (customerId && confirm('Ta bort kunden och dess kontaktpersoner?')) { data.customers = data.customers.filter(c => c.id !== customerId); data.contacts = data.contacts.filter(c => c.customerId !== customerId); save(); render(); }
-  if (contactId && confirm('Ta bort kontaktpersonen?')) { data.contacts = data.contacts.filter(c => c.id !== contactId); save(); render(); }
-});
-
-document.getElementById('bg-input').addEventListener('change', event => { const file = event.target.files[0]; if (file) document.body.style.backgroundImage = `url(${URL.createObjectURL(file)})`; });
-document.getElementById('clear-bg').addEventListener('click', () => { document.body.style.backgroundImage = ''; });
+const ACCESS_CODE='uf202609';const STORAGE_KEY='crmData';const overlay=document.getElementById('auth-overlay'),authInput=document.getElementById('auth-input'),authSubmit=document.getElementById('auth-submit'),authMessage=document.getElementById('auth-message'),siteContent=document.getElementById('site-content');let data=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{"customers":[],"contacts":[]}');data.customers=data.customers.map(c=>({status:'active',notes:'',logo:'',followUp:'',value:0,...c}));data.contacts=data.contacts||[];let followFilter='all';const save=()=>localStorage.setItem(STORAGE_KEY,JSON.stringify(data));const id=()=>`${Date.now()}-${Math.random().toString(36).slice(2,8)}`;const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));const customerName=id=>data.customers.find(c=>c.id===id)?.name||'Okänd kund';const statusName={lead:'Lead',active:'Aktiv',paused:'Pausad',won:'Kund'};const today=()=>new Date().toISOString().slice(0,10);const daysFromToday=d=>Math.ceil((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000);
+function unlock(){overlay.style.display='none';siteContent.classList.remove('site-hidden');siteContent.setAttribute('aria-hidden','false');render()}function tryUnlock(){if(authInput.value.trim()===ACCESS_CODE){sessionStorage.setItem('siteUnlocked','1');unlock()}else{authMessage.textContent='Fel kod – försök igen.';authInput.value='';authInput.focus()}}authSubmit.onclick=tryUnlock;authInput.onkeydown=e=>{if(e.key==='Enter')tryUnlock()};if(sessionStorage.getItem('siteUnlocked')==='1')unlock();
+function setTab(tab){document.querySelectorAll('.tab-button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===`tab-${tab}`));history.replaceState(null,'',`#${tab}`)}document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));document.querySelectorAll('[data-tab-link]').forEach(b=>b.onclick=()=>setTab(b.dataset.tabLink));
+function statusBadge(s){return `<span class="status status-${s}">${statusName[s]||'Aktiv'}</span>`}function logo(c){return c.logo?`<img class="record-logo" src="${esc(c.logo)}" alt="Logotyp för ${esc(c.name)}">`:''}function customerMatches(c,q){return `${c.name} ${c.org} ${c.email} ${c.phone} ${c.notes}`.toLowerCase().includes(q)}
+function render(){const q=(document.getElementById('search-input')?.value||'').trim().toLowerCase(),filter=document.getElementById('status-filter')?.value||'all';document.getElementById('customer-count').textContent=data.customers.filter(c=>c.status!=='paused').length;document.getElementById('contact-count').textContent=data.contacts.length;document.getElementById('followup-count').textContent=data.customers.filter(c=>!c.followUp||daysFromToday(c.followUp)<=7).length;document.getElementById('value-count').textContent=`${data.customers.reduce((n,c)=>n+(Number(c.value)||0),0).toLocaleString('sv-SE')} kr`;const select=document.getElementById('contact-customer'),selected=select.value;select.innerHTML='<option value="">Välj kund</option>'+data.customers.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');select.value=selected;let customers=data.customers.filter(c=>(filter==='all'||c.status===filter)&&customerMatches(c,q));document.getElementById('customer-list').innerHTML=customers.length?customers.map(customerCard).join(''):'<p class="empty-state">Inga kunder matchar sökningen.</p>';let contacts=data.contacts.filter(c=>`${c.name} ${c.email} ${c.role} ${customerName(c.customerId)}`.toLowerCase().includes(q));document.getElementById('contact-list').innerHTML=contacts.length?contacts.map(contactCard).join(''):'<p class="empty-state">Inga kontaktpersoner ännu.</p>';const recent=[...data.customers].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,4);document.getElementById('recent-customers').innerHTML=recent.length?recent.map(customerCard).join(''):'<p class="empty-state">Lägg till din första kund.</p>';renderFollowups();renderUpcoming()}
+function customerCard(c){return `<article class="record"><div class="record-main">${logo(c)}<div><h3>${esc(c.name)} ${statusBadge(c.status)}</h3><p>${esc(c.org||'Org.nr saknas')} · ${esc(c.email||'Ingen e-post')} · ${esc(c.phone||'Inget telefonnummer')}</p>${c.notes?`<p>${esc(c.notes.slice(0,90))}${c.notes.length>90?'…':''}</p>`:''}</div></div><div class="record-actions"><button class="small-button" data-edit-customer="${esc(c.id)}">Redigera</button><button class="small-button delete-button" data-delete-customer="${esc(c.id)}">Ta bort</button></div></article>`}function contactCard(c){return `<article class="record"><div><h3>${esc(c.name)} ${c.role?`<span>${esc(c.role)}</span>`:''}</h3><p>${esc(customerName(c.customerId))} · ${esc(c.email||'Ingen e-post')} · ${esc(c.phone||'Inget telefonnummer')}</p></div><div class="record-actions"><button class="small-button" data-edit-contact="${esc(c.id)}">Redigera</button><button class="small-button delete-button" data-delete-contact="${esc(c.id)}">Ta bort</button></div></article>`}
+function renderUpcoming(){const list=data.customers.filter(c=>c.followUp).sort((a,b)=>a.followUp.localeCompare(b.followUp)).slice(0,4);document.getElementById('upcoming-followups').innerHTML=list.length?list.map(c=>`<div class="followup-item ${daysFromToday(c.followUp)<0?'overdue':''}"><div><strong>${esc(c.name)}</strong><p class="date-note">${esc(c.notes||'Ingen anteckning')}</p></div><span class="followup-date">${new Date(c.followUp+'T00:00:00').toLocaleDateString('sv-SE')}</span></div>`).join(''):'<p class="empty-state">Inga uppföljningar planerade.</p>'}function renderFollowups(){let list=[...data.customers].sort((a,b)=>(a.followUp||'9999').localeCompare(b.followUp||'9999'));if(followFilter==='overdue')list=list.filter(c=>c.followUp&&daysFromToday(c.followUp)<0);if(followFilter==='soon')list=list.filter(c=>c.followUp&&daysFromToday(c.followUp)>=0&&daysFromToday(c.followUp)<=7);if(followFilter==='none')list=list.filter(c=>!c.followUp);document.getElementById('followup-list').innerHTML=list.length?list.map(c=>{const d=c.followUp?daysFromToday(c.followUp):null;const cls=d!==null&&d<0?'overdue':d!==null&&d<=7?'soon':'';return `<div class="followup-item ${cls}"><div class="record-main">${logo(c)}<div><h3>${esc(c.name)} ${statusBadge(c.status)}</h3><p class="date-note">${esc(c.notes||'Ingen anteckning')}</p></div></div><div><div class="followup-date">${c.followUp?new Date(c.followUp+'T00:00:00').toLocaleDateString('sv-SE'):'Inget datum'}</div><button class="small-button" data-edit-customer="${esc(c.id)}">Redigera</button></div></div>`}).join(''):'<p class="empty-state">Inga kunder i denna vy.</p>'}
+function openCustomer(customer){const f=document.getElementById('customer-form');f.reset();document.getElementById('edit-customer-id').value=customer?.id||'';document.getElementById('customer-dialog-title').textContent=customer?'Redigera kund':'Ny kund';if(customer){['name','org','email','phone','status','followUp','value','notes'].forEach(k=>{const el=document.getElementById('customer-'+k);if(el)el.value=customer[k]??''})}document.getElementById('customer-dialog').showModal()}function openContact(contact){document.getElementById('contact-form').reset();document.getElementById('edit-contact-id').value=contact?.id||'';document.getElementById('contact-dialog-title').textContent=contact?'Redigera kontaktperson':'Ny kontaktperson';if(contact){['name','customer','email','phone','role'].forEach(k=>{const el=document.getElementById('contact-'+k);if(el)el.value=k==='customer'?contact.customerId:contact[k]||''})}document.getElementById('contact-dialog').showModal()}
+document.querySelectorAll('[data-open-customer]').forEach(b=>b.onclick=()=>openCustomer());document.querySelectorAll('[data-open-contact]').forEach(b=>b.onclick=()=>openContact());document.querySelectorAll('[data-close-dialog]').forEach(b=>b.onclick=()=>b.closest('dialog').close());document.getElementById('search-input').oninput=render;document.getElementById('status-filter').onchange=render;document.querySelectorAll('[data-follow-filter]').forEach(b=>b.onclick=()=>{followFilter=b.dataset.followFilter;document.querySelectorAll('[data-follow-filter]').forEach(x=>x.classList.toggle('active',x===b));renderFollowups()});
+document.getElementById('customer-form').onsubmit=async e=>{e.preventDefault();const file=document.getElementById('customer-logo').files[0];const old=data.customers.find(c=>c.id===document.getElementById('edit-customer-id').value);const customer={...(old||{}),id:old?.id||id(),name:document.getElementById('customer-name').value.trim(),org:document.getElementById('customer-org').value.trim(),email:document.getElementById('customer-email').value.trim(),phone:document.getElementById('customer-phone').value.trim(),status:document.getElementById('customer-status').value,followUp:document.getElementById('customer-followUp').value,value:Number(document.getElementById('customer-value').value)||0,notes:document.getElementById('customer-notes').value.trim(),createdAt:old?.createdAt||new Date().toISOString()};if(file)customer.logo=await fileToData(file);if(old)data.customers=data.customers.map(c=>c.id===old.id?customer:c);else data.customers.push(customer);save();e.target.closest('dialog').close();render()};document.getElementById('contact-form').onsubmit=e=>{e.preventDefault();const old=data.contacts.find(c=>c.id===document.getElementById('edit-contact-id').value),contact={...(old||{}),id:old?.id||id(),name:document.getElementById('contact-name').value.trim(),customerId:document.getElementById('contact-customer').value,email:document.getElementById('contact-email').value.trim(),phone:document.getElementById('contact-phone').value.trim(),role:document.getElementById('contact-role').value.trim()};if(old)data.contacts=data.contacts.map(c=>c.id===old.id?contact:c);else data.contacts.push(contact);save();e.target.closest('dialog').close();render()};function fileToData(file){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.readAsDataURL(file)})}
+document.addEventListener('click',e=>{const ce=e.target.closest('[data-edit-customer]'),de=e.target.closest('[data-delete-customer]'),co=e.target.closest('[data-edit-contact]'),dc=e.target.closest('[data-delete-contact]');if(ce)openCustomer(data.customers.find(c=>c.id===ce.dataset.editCustomer));if(co)openContact(data.contacts.find(c=>c.id===co.dataset.editContact));if(de&&confirm('Ta bort kunden och dess kontaktpersoner?')){data.customers=data.customers.filter(c=>c.id!==de.dataset.deleteCustomer);data.contacts=data.contacts.filter(c=>c.customerId!==de.dataset.deleteCustomer);save();render()}if(dc&&confirm('Ta bort kontaktpersonen?')){data.contacts=data.contacts.filter(c=>c.id!==dc.dataset.deleteContact);save();render()}});document.getElementById('bg-input').onchange=e=>{const f=e.target.files[0];if(f)document.body.style.backgroundImage=`url(${URL.createObjectURL(f)})`};document.getElementById('clear-bg').onclick=()=>document.body.style.backgroundImage='';
