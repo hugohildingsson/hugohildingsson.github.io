@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Min videohemsida</title>
+  <title>CRM</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,62 +12,69 @@
       <h2 id="auth-title">Ange kod för åtkomst</h2>
       <p>Skriv in koden för att visa sidan.</p>
       <input id="auth-input" type="password" placeholder="Kod" aria-label="Kod" />
-      <div class="auth-actions">
-        <button id="auth-submit">Öppna</button>
-      </div>
+      <div class="auth-actions"><button id="auth-submit">Öppna</button></div>
       <p id="auth-message" class="auth-message" aria-live="polite"></p>
-      <p class="auth-note"><strong>Observera:</strong> Detta är endast ett enkelt klient‑sidigt skydd och inte säkert för känsligt innehåll.</p>
+      <p class="auth-note"><strong>Observera:</strong> Detta är endast ett enkelt klient-sidigt skydd och inte säkert för känsliga kunduppgifter.</p>
     </div>
   </div>
 
   <div id="site-content" class="site-hidden" aria-hidden="true">
     <header class="site-header">
       <div class="header-inner">
-        <h1 tabindex="-1">Min videohemsida</h1>
-
-        <div class="right-controls">
-          <nav class="company-nav" aria-label="Företagsmeny">
-            <ul id="company-menu" class="company-menu"></ul>
-            <button id="add-company" class="btn-link">+ Lägg till företag</button>
-          </nav>
-
-          <div class="bg-control">
-            <label class="upload-bg">
-              Välj bakgrund
-              <input id="bg-input" type="file" accept="image/*" />
-            </label>
-            <button id="clear-bg" class="btn-link">Ta bort bakgrund</button>
-          </div>
-
-          <!-- Quick icon menu -->
-          <div class="quick-menu-wrapper" id="quick-wrapper">
-            <button id="quick-menu-btn" class="quick-menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Snabbmeny företag">
-              <!-- simple icon -->
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M3 6h18M3 12h18M3 18h18" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <ul id="quick-menu" class="quick-menu" role="menu" aria-label="Företagslänkar">
-              <!-- Populeras av script.js -->
-            </ul>
-          </div>
-
+        <div>
+          <p class="eyebrow">KUNDRELATIONER</p>
+          <h1>Mitt CRM</h1>
+          <p class="intro">Hantera kunder och kontaktpersoner på ett ställe.</p>
+        </div>
+        <div class="bg-control">
+          <label class="upload-bg">Välj bakgrund<input id="bg-input" type="file" accept="image/*" /></label>
+          <button id="clear-bg" class="btn-link">Ta bort bakgrund</button>
         </div>
       </div>
-      <p class="intro">Här kan du lägga in videofiler i rektangulära kort. Klicka ett företag i menyn för att hoppa till dess sektion eller öppna företagets webb om en länk är angiven.</p>
     </header>
 
     <main class="container">
-      <div id="companies">
-        <!-- Företagssektioner skapas dynamiskt -->
-      </div>
+      <section class="stats" aria-label="Sammanfattning">
+        <div class="stat-card"><span id="customer-count">0</span><small>Kunder</small></div>
+        <div class="stat-card"><span id="contact-count">0</span><small>Kontaktpersoner</small></div>
+      </section>
+
+      <section class="crm-grid">
+        <div class="panel">
+          <h2>Lägg till kund</h2>
+          <form id="customer-form" class="crm-form">
+            <label>Företagsnamn<input id="customer-name" required maxlength="100" placeholder="Exempel AB" /></label>
+            <label>Organisationsnummer<input id="customer-org" maxlength="30" placeholder="556000-0000" /></label>
+            <label>E-post<input id="customer-email" type="email" maxlength="120" placeholder="info@exempel.se" /></label>
+            <label>Telefon<input id="customer-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label>
+            <button class="primary-button" type="submit">+ Lägg till kund</button>
+          </form>
+        </div>
+        <div class="panel">
+          <h2>Lägg till kontaktperson</h2>
+          <form id="contact-form" class="crm-form">
+            <label>Namn<input id="contact-name" required maxlength="100" placeholder="Anna Andersson" /></label>
+            <label>Kund<select id="contact-customer" required><option value="">Välj kund</option></select></label>
+            <label>E-post<input id="contact-email" type="email" maxlength="120" placeholder="anna@exempel.se" /></label>
+            <label>Telefon<input id="contact-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label>
+            <label>Roll<input id="contact-role" maxlength="80" placeholder="Inköpschef" /></label>
+            <button class="primary-button" type="submit">+ Lägg till kontakt</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel records-panel">
+        <div class="section-heading"><h2>Kunder</h2><input id="search-input" type="search" placeholder="Sök kunder och kontakter..." aria-label="Sök" /></div>
+        <div id="customer-list" class="record-list"></div>
+      </section>
+
+      <section class="panel records-panel">
+        <div class="section-heading"><h2>Kontaktpersoner</h2></div>
+        <div id="contact-list" class="record-list"></div>
+      </section>
     </main>
-
-    <footer class="site-footer">
-      <p>Instruktion: Klicka företagsnamnet för att hoppa till dess sektion. Inuti varje sektion kan du lägga till videokort för det företaget.</p>
-    </footer>
+    <footer class="site-footer"><p>Data sparas lokalt i den här webbläsaren.</p></footer>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
