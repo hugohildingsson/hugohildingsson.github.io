@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Legacy UF CRM</title>
-  <link rel="stylesheet" href="styles.css?v=legacy-qr-1" />
+  <link rel="stylesheet" href="styles.css?v=crm-qr-2" />
 </head>
 <body>
   <div id="auth-overlay" class="auth-overlay" aria-hidden="false">
@@ -27,6 +27,7 @@
           <button class="tab-button active" data-tab="overview">Översikt</button>
           <button class="tab-button" data-tab="customers">Kunder</button>
           <button class="tab-button" data-tab="followup">Koll på kunder</button>
+          <button class="tab-button" data-tab="company-overview">Företagsöversikt</button>
         </nav>
         <div class="header-actions">
           <label class="upload-bg">Bakgrund<input id="bg-input" type="file" accept="image/*" /></label>
@@ -127,6 +128,19 @@
           <div id="followup-list" class="followup-list"></div>
         </div>
       </section>
+
+      <section id="tab-company-overview" class="tab-panel">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">FÖRETAG</p>
+            <h1>Företagsöversikt</h1>
+            <p>Se och hantera alla QR-koder per företag.</p>
+          </div>
+          <button class="primary-button" data-open-customer>+ Ny kund</button>
+        </div>
+
+        <div id="company-overview-list" class="company-overview-list"></div>
+      </section>
     </main>
     <footer class="site-footer">LEGACY UF <span>•</span> Data sparas lokalt i den här webbläsaren.</footer>
   </div>
@@ -148,7 +162,6 @@
         <label>Nästa uppföljning<input id="customer-followup" type="date" /></label>
         <label class="full-width">Kundvärde (kr)<input id="customer-value" type="number" min="0" step="1" placeholder="0" /></label>
         <label class="full-width">Anteckningar<textarea id="customer-notes" rows="4" maxlength="1000" placeholder="Skriv viktiga anteckningar..."></textarea></label>
-        <label class="full-width">QR-kod<input id="customer-qr" type="file" accept="image/*" /><small class="field-help">Ladda upp en egen QR-kod. Bilden sparas lokalt i webbläsaren.</small></label>
       </div>
 
       <div class="dialog-actions">
@@ -181,6 +194,28 @@
     </form>
   </dialog>
 
-  <script src="script.js?v=legacy-qr-1"></script>
+  <dialog id="qr-dialog" class="crm-dialog">
+    <form id="qr-form" method="dialog">
+      <div class="dialog-heading">
+        <div><p class="panel-label">QR-KOD</p><h2 id="qr-dialog-title">Lägg till QR-kod</h2></div>
+        <button type="button" class="close-button" data-close-dialog>×</button>
+      </div>
+      <input type="hidden" id="qr-company-id" />
+      <input type="hidden" id="qr-edit-id" />
+
+      <div class="form-grid">
+        <label class="full-width">Namn på QR-kod<input id="qr-name" required maxlength="80" placeholder="Till exempel Instagram, Meny, Sökväg" /></label>
+        <label class="full-width">QR-bild<input id="qr-image" type="file" accept="image/*" required /></label>
+        <label class="full-width">Länk / mål URL (valfritt)<input id="qr-target" type="url" maxlength="250" placeholder="https://example.com" /></label>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" data-close-dialog>Avbryt</button>
+        <button class="primary-button" type="submit">Spara QR-kod</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="script.js?v=crm-qr-2"></script>
 </body>
 </html>

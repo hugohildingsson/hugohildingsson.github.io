@@ -10,6 +10,7 @@ let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"customers":[],"con
 if (!Array.isArray(data.customers)) data.customers = [];
 if (!Array.isArray(data.contacts)) data.contacts = [];
 
+
 data.customers = data.customers.map(customer => ({
   id: customer.id || cryptoRandomId(),
   name: customer.name || '',
@@ -20,8 +21,14 @@ data.customers = data.customers.map(customer => ({
   followUp: customer.followUp || '',
   value: Number(customer.value) || 0,
   notes: customer.notes || '',
-  logo: customer.logo || '',
-  qr: customer.qr || '',
+  qrItems: Array.isArray(customer.qrItems) ? customer.qrItems.map(qr => ({
+    id: qr.id || cryptoRandomId(),
+    name: qr.name || 'QR-kod',
+    image: qr.image || '',
+    target: qr.target || '',
+    scanCount: Number(qr.scanCount) || 0,
+    createdAt: qr.createdAt || new Date().toISOString()
+  })) : [],
   createdAt: customer.createdAt || new Date().toISOString()
 }));
 
@@ -103,6 +110,12 @@ function statusBadge(status) {
   return `<span class="status status-${status}">${statusNames[status] || 'Aktiv'}</span>`;
 }
 
+function getTotalQrScans() {
+  return data.customers.reduce((sum, customer) => {
+    return sum + (customer.qrItems || []).reduce((inner, qr) => inner + (Number(qr.scanCount) || 0), 0);
+  }, 0);
+}
+
 function renderSummary() {
   const totalCustomers = data.customers.length;
   const totalContacts = data.contacts.length;
@@ -113,6 +126,7 @@ function renderSummary() {
   document.getElementById('contact-count').textContent = totalContacts;
   document.getElementById('followup-count').textContent = activeFollowUps;
   document.getElementById('value-count').textContent = `${totalValue.toLocaleString('sv-SE')} kr`;
+  document.getElementById('customer-count')?.setAttribute('title', `${getTotalQrScans()} QR-skanningar totalt`);
 }
 
 function renderCustomerSelect() {
@@ -147,15 +161,15 @@ function renderCustomersList() {
     ? filtered.map(customer => `
       <article class="record">
         <div class="record-main">
-          ${customer.logo ? `<img class="record-logo" src="${escapeHtml(customer.logo)}" alt="Logotyp för ${escapeHtml(customer.name)}" />` : ''}
-          ${customer.qr ? `<button class="qr-mini" data-qr-customer="${escapeHtml(customer.id)}" title="Visa QR-kod">QR</button>` : ''}
-          <div>
+          <div class="record-labels">
             <h3>${escapeHtml(customer.name)} ${statusBadge(customer.status)}</h3>
             <p>${escapeHtml(customer.org || 'Org.nr saknas')} · ${escapeHtml(customer.email || 'Ingen e-post')} · ${escapeHtml(customer.phone || 'Inget telefonnummer')}</p>
+            ${customer.qrItems && customer.qrItems.length ? `<p>QR-koder: <strong>${customer.qrItems.length}</strong> · Skannade: <strong>${customer.qrItems.reduce((sum, qr) => sum + (Number(qr.scanCount) || 0), 0)}</strong></p>` : '<p>Inga QR-koder ännu</p>'}
             ${customer.notes ? `<p>${escapeHtml(customer.notes.slice(0, 90))}${customer.notes.length > 90 ? '…' : ''}</p>` : ''}
           </div>
         </div>
         <div class="record-actions">
+          <button class="small-button" data-show-company-qr="${escapeHtml(customer.id)}">QR</button>
           <button class="small-button" data-edit-customer="${escapeHtml(customer.id)}">Redigera</button>
           <button class="small-button delete-button" data-delete-customer="${escapeHtml(customer.id)}">Ta bort</button>
         </div>
@@ -200,11 +214,10 @@ function renderRecentCustomers() {
     ? recent.map(customer => `
       <article class="record">
         <div class="record-main">
-          ${customer.logo ? `<img class="record-logo" src="${escapeHtml(customer.logo)}" alt="Logotyp för ${escapeHtml(customer.name)}" />` : ''}
-          ${customer.qr ? `<button class="qr-mini" data-qr-customer="${escapeHtml(customer.id)}" title="Visa QR-kod">QR</button>` : ''}
           <div>
             <h3>${escapeHtml(customer.name)} ${statusBadge(customer.status)}</h3>
             <p>${escapeHtml(customer.email || 'Ingen e-post')} · ${escapeHtml(customer.phone || 'Inget telefonnummer')}</p>
+            <p>QR-koder: <strong>${(customer.qrItems || []).length}</strong> · Skanningar: <strong>${(customer.qrItems || []).reduce((sum, qr) => sum + (Number(qr.scanCount) || 0), 0)}</strong></p>
           </div>
         </div>
       </article>
@@ -214,8 +227,8 @@ function renderRecentCustomers() {
 
 function daysUntil(dateString) {
   if (!dateString) return null;
-  const now = new Date();
   const target = new Date(`${dateString}T00:00:00`);
+  const now = new Date();
   const diff = target.getTime() - now.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
@@ -266,8 +279,6 @@ function renderFollowUpList() {
         return `
           <div class="followup-item ${className}">
             <div class="record-main">
-              ${customer.logo ? `<img class="record-logo" src="${escapeHtml(customer.logo)}" alt="Logotyp för ${escapeHtml(customer.name)}" />` : ''}
-              ${customer.qr ? `<button class="qr-mini" data-qr-customer="${escapeHtml(customer.id)}" title="Visa QR-kod">QR</button>` : ''}
               <div>
                 <h3>${escapeHtml(customer.name)} ${statusBadge(customer.status)}</h3>
                 <p class="date-note">${escapeHtml(customer.notes || 'Ingen anteckning')}</p>
@@ -283,6 +294,52 @@ function renderFollowUpList() {
     : '<p class="empty-state">Inga kunder i denna vy.</p>';
 }
 
+function renderCompanyOverview() {
+  const container = document.getElementById('company-overview-list');
+  if (!container) return;
+
+  if (!data.customers.length) {
+    container.innerHTML = '<div class="panel empty-company-panel"><p class="empty-state">Inga företag har lagts till ännu.</p></div>';
+    return;
+  }
+
+  container.innerHTML = data.customers.map(customer => {
+    const qrList = (customer.qrItems || []).length
+      ? (customer.qrItems || []).map(qr => `
+        <div class="qr-card">
+          <div class="qr-preview-box">
+            <img src="${escapeHtml(qr.image || '')}" alt="QR-kod för ${escapeHtml(qr.name || customer.name)}" />
+          </div>
+          <div class="qr-meta">
+            <h4>${escapeHtml(qr.name || 'QR-kod')}</h4>
+            ${qr.target ? `<a href="${escapeHtml(qr.target)}" target="_blank" rel="noreferrer noopener">Öppna länk</a>` : '<span>Ingen länk</span>'}
+            <div class="scan-count">Skannad: <strong>${Number(qr.scanCount) || 0}</strong> gånger</div>
+            <div class="qr-actions">
+              <button class="small-button" data-increment-qr="${escapeHtml(customer.id)}|${escapeHtml(qr.id)}">+1 skanning</button>
+              <button class="small-button" data-edit-qr="${escapeHtml(customer.id)}|${escapeHtml(qr.id)}">Redigera</button>
+              <button class="small-button delete-button" data-delete-qr="${escapeHtml(customer.id)}|${escapeHtml(qr.id)}">Ta bort</button>
+            </div>
+          </div>
+        </div>
+      `).join('')
+      : '<div class="empty-qr-box">Inga QR-koder för detta företag ännu.</div>';
+
+    return `
+      <article class="company-overview-card panel">
+        <div class="company-overview-head">
+          <div>
+            <h3>${escapeHtml(customer.name)}</h3>
+            <p>${escapeHtml(customer.org || 'Inget org.nr')}</p>
+          </div>
+          <button class="small-button primary-small-button" data-open-qr="${escapeHtml(customer.id)}">+ Lägg till QR-kod</button>
+        </div>
+        <div class="company-scan-summary">Totalt skannat: <strong>${(customer.qrItems || []).reduce((sum, qr) => sum + (Number(qr.scanCount) || 0), 0)}</strong> gånger</div>
+        <div class="qr-grid">${qrList}</div>
+      </article>
+    `;
+  }).join('');
+}
+
 function render() {
   renderSummary();
   renderCustomerSelect();
@@ -291,6 +348,7 @@ function render() {
   renderRecentCustomers();
   renderUpcomingFollowUps();
   renderFollowUpList();
+  renderCompanyOverview();
 }
 
 function openCustomerDialog(customer = null) {
@@ -339,29 +397,65 @@ function openContactDialog(contact = null) {
   dialog.showModal();
 }
 
-function showQr(customerId) {
-  const customer = data.customers.find(c => c.id === customerId);
-  if (!customer || !customer.qr) return;
+function openQrDialog(companyId, qr = null) {
+  const dialog = document.getElementById('qr-dialog');
+  const form = document.getElementById('qr-form');
+  const companyInput = document.getElementById('qr-company-id');
+  const editInput = document.getElementById('qr-edit-id');
+  const nameInput = document.getElementById('qr-name');
+  const imageInput = document.getElementById('qr-image');
+  const targetInput = document.getElementById('qr-target');
+  const title = document.getElementById('qr-dialog-title');
 
-  const existing = document.getElementById('qr-modal');
-  if (existing) existing.remove();
+  form.reset();
+  companyInput.value = companyId;
+  editInput.value = qr ? qr.id : '';
+  title.textContent = qr ? 'Redigera QR-kod' : 'Lägg till QR-kod';
 
-  const modal = document.createElement('div');
-  modal.id = 'qr-modal';
-  modal.className = 'qr-modal';
-  modal.innerHTML = `
-    <div class="qr-modal-card">
-      <button class="close-button" data-close-qr>×</button>
-      <h3>${escapeHtml(customer.name)}</h3>
-      <div class="qr-preview"><img src="${escapeHtml(customer.qr)}" alt="QR-kod för ${escapeHtml(customer.name)}" /></div>
-    </div>
-  `;
-  document.body.appendChild(modal);
+  if (qr) {
+    nameInput.value = qr.name || '';
+    targetInput.value = qr.target || '';
+  }
 
-  modal.querySelector('[data-close-qr]').addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', (event) => {
-    if (event.target === modal) modal.remove();
+  imageInput.required = !qr;
+  dialog.showModal();
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
+}
+
+function getCustomerById(customerId) {
+  return data.customers.find(customer => customer.id === customerId);
+}
+
+function incrementQrCounter(customerId, qrId) {
+  const customer = getCustomerById(customerId);
+  if (!customer) return;
+
+  customer.qrItems = (customer.qrItems || []).map(qr => {
+    if (qr.id === qrId) {
+      return { ...qr, scanCount: Number(qr.scanCount) || 0 + 1 };
+    }
+    return qr;
+  });
+
+  saveData();
+  render();
+}
+
+function deleteQr(customerId, qrId) {
+  const customer = getCustomerById(customerId);
+  if (!customer) return;
+
+  customer.qrItems = (customer.qrItems || []).filter(qr => qr.id !== qrId);
+  saveData();
+  render();
 }
 
 document.querySelectorAll('[data-open-customer]').forEach(button => {
@@ -387,21 +481,11 @@ document.querySelectorAll('[data-follow-filter]').forEach(button => {
   });
 });
 
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 document.getElementById('customer-form')?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   const customerId = document.getElementById('edit-customer-id').value;
   const existingCustomer = data.customers.find(c => c.id === customerId);
-  const qrFile = document.getElementById('customer-qr').files[0];
 
   const customer = {
     id: existingCustomer ? existingCustomer.id : cryptoRandomId(),
@@ -414,13 +498,8 @@ document.getElementById('customer-form')?.addEventListener('submit', async (even
     value: Number(document.getElementById('customer-value').value || 0),
     notes: document.getElementById('customer-notes').value.trim(),
     createdAt: existingCustomer ? existingCustomer.createdAt : new Date().toISOString(),
-    logo: existingCustomer?.logo || '',
-    qr: existingCustomer?.qr || ''
+    qrItems: existingCustomer ? existingCustomer.qrItems || [] : []
   };
-
-  if (qrFile) {
-    customer.qr = await fileToDataUrl(qrFile);
-  }
 
   if (existingCustomer) {
     data.customers = data.customers.map(c => c.id === customerId ? customer : c);
@@ -459,12 +538,50 @@ document.getElementById('contact-form')?.addEventListener('submit', (event) => {
   document.getElementById('contact-dialog').close();
 });
 
+document.getElementById('qr-form')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const companyId = document.getElementById('qr-company-id').value;
+  const qrId = document.getElementById('qr-edit-id').value;
+  const customer = getCustomerById(companyId);
+  if (!customer) return;
+
+  const file = document.getElementById('qr-image').files[0];
+  const image = qrId ? (customer.qrItems || []).find(qr => qr.id === qrId)?.image || '' : '';
+  const finalImage = file ? await fileToDataUrl(file) : image;
+
+  const nextQr = {
+    id: qrId || cryptoRandomId(),
+    name: document.getElementById('qr-name').value.trim() || 'QR-kod',
+    image: finalImage,
+    target: document.getElementById('qr-target').value.trim(),
+    scanCount: qrId ? ((customer.qrItems || []).find(qr => qr.id === qrId)?.scanCount || 0) : 0,
+    createdAt: qrId ? ((customer.qrItems || []).find(qr => qr.id === qrId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+  };
+
+  customer.qrItems = customer.qrItems || [];
+
+  if (qrId) {
+    customer.qrItems = customer.qrItems.map(qr => qr.id === qrId ? nextQr : qr);
+  } else {
+    customer.qrItems.push(nextQr);
+  }
+
+  saveData();
+  render();
+  document.getElementById('qr-dialog').close();
+});
+
 document.addEventListener('click', (event) => {
   const editCustomerButton = event.target.closest('[data-edit-customer]');
   const deleteCustomerButton = event.target.closest('[data-delete-customer]');
   const editContactButton = event.target.closest('[data-edit-contact]');
   const deleteContactButton = event.target.closest('[data-delete-contact]');
-  const qrButton = event.target.closest('[data-qr-customer]');
+  const qrOpenButton = event.target.closest('[data-open-qr]');
+  const qrEditButton = event.target.closest('[data-edit-qr]');
+  const qrDeleteButton = event.target.closest('[data-delete-qr]');
+  const qrIncrementButton = event.target.closest('[data-increment-qr]');
+  const showCompanyQrButton = event.target.closest('[data-show-company-qr]');
 
   if (editCustomerButton) {
     const customer = data.customers.find(c => c.id === editCustomerButton.dataset.editCustomer);
@@ -495,8 +612,41 @@ document.addEventListener('click', (event) => {
     }
   }
 
-  if (qrButton) {
-    showQr(qrButton.dataset.qrCustomer);
+  if (qrOpenButton) {
+    openQrDialog(qrOpenButton.dataset.openQr);
+  }
+
+  if (qrEditButton) {
+    const [customerId, qrId] = qrEditButton.dataset.editQr.split('|');
+    const customer = getCustomerById(customerId);
+    const qr = (customer?.qrItems || []).find(item => item.id === qrId);
+    if (customer && qr) openQrDialog(customerId, qr);
+  }
+
+  if (qrDeleteButton) {
+    const [customerId, qrId] = qrDeleteButton.dataset.deleteQr.split('|');
+    if (confirm('Ta bort QR-koden?')) {
+      deleteQr(customerId, qrId);
+    }
+  }
+
+  if (qrIncrementButton) {
+    const [customerId, qrId] = qrIncrementButton.dataset.incrementQr.split('|');
+    const customer = getCustomerById(customerId);
+    const qr = (customer?.qrItems || []).find(item => item.id === qrId);
+    if (customer && qr) {
+      customer.qrItems = (customer.qrItems || []).map(item => item.id === qrId ? { ...item, scanCount: (Number(item.scanCount) || 0) + 1 } : item);
+      saveData();
+      render();
+    }
+  }
+
+  if (showCompanyQrButton) {
+    const customer = data.customers.find(c => c.id === showCompanyQrButton.dataset.showCompanyQr);
+    if (customer) {
+      setTab('company-overview');
+      document.getElementById('company-overview-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 });
 
