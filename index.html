@@ -4,25 +4,183 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Legacy UF CRM</title>
-  <link rel="stylesheet" href="styles.css?v=crm-4" />
+  <link rel="stylesheet" href="styles.css?v=legacy-qr-1" />
 </head>
 <body>
-  <div id="auth-overlay" class="auth-overlay" aria-hidden="false"><div class="auth-box" role="dialog" aria-labelledby="auth-title"><p class="auth-brand">LEGACY <span>UF</span></p><h2 id="auth-title">Ange kod för åtkomst</h2><p>Skriv in koden för att visa CRM-systemet.</p><input id="auth-input" type="password" placeholder="Kod" aria-label="Kod" /><button id="auth-submit" class="primary-button">Öppna CRM</button><p id="auth-message" class="auth-message" aria-live="polite"></p><p class="auth-note">Klient-sidigt skydd – använd inte för känsliga uppgifter.</p></div></div>
-
-  <div id="site-content" class="site-hidden" aria-hidden="true">
-    <header class="site-header"><div class="header-inner"><a class="brand" href="#overview"><span class="brand-mark">L</span><span><b>LEGACY</b><small>UF</small></span></a><nav class="main-nav" aria-label="Huvudmeny"><button class="tab-button active" data-tab="overview">Översikt</button><button class="tab-button" data-tab="customers">Kunder</button><button class="tab-button" data-tab="followup">Koll på kunder</button></nav><div class="header-actions"><label class="upload-bg">Bakgrund<input id="bg-input" type="file" accept="image/*" /></label><button id="clear-bg" class="icon-button" title="Återställ bakgrund">↺</button></div></div></header>
-
-    <main class="container">
-      <section id="tab-overview" class="tab-panel active"><div class="hero"><div><p class="eyebrow">LEGACY UF / CRM</p><h1>Din kundöversikt</h1><p>Allt du behöver för att hålla koll på kunder och relationer.</p></div><button class="primary-button" data-open-customer>+ Ny kund</button></div><div class="stats"><div class="stat-card"><span id="customer-count">0</span><small>AKTIVA KUNDER</small></div><div class="stat-card"><span id="contact-count">0</span><small>KONTAKTPERSONER</small></div><div class="stat-card"><span id="followup-count">0</span><small>ATT FÖLJA UPP</small></div><div class="stat-card"><span id="value-count">0 kr</span><small>AKTUELLT VÄRDE</small></div></div><div class="overview-grid"><section class="panel"><div class="section-heading"><div><p class="panel-label">SENASTE</p><h2>Senast tillagda kunder</h2></div><button class="text-button" data-tab-link="customers">Visa alla →</button></div><div id="recent-customers" class="record-list"></div></section><section class="panel"><div class="section-heading"><div><p class="panel-label">NÄSTA STEG</p><h2>Kommande uppföljningar</h2></div><button class="text-button" data-tab-link="followup">Visa alla →</button></div><div id="upcoming-followups" class="record-list"></div></section></div></section>
-
-      <section id="tab-customers" class="tab-panel"><div class="page-heading"><div><p class="eyebrow">REGISTER</p><h1>Kunder & kontakter</h1><p>Hantera företagen och personerna i ditt nätverk.</p></div><button class="primary-button" data-open-customer>+ Ny kund</button></div><div class="toolbar"><input id="search-input" type="search" placeholder="Sök kunder, personer eller e-post..." aria-label="Sök" /><select id="status-filter" aria-label="Filtrera status"><option value="all">Alla statusar</option><option value="lead">Lead</option><option value="active">Aktiv</option><option value="paused">Pausad</option><option value="won">Kund</option></select></div><div class="panel records-panel"><div id="customer-list" class="record-list"></div></div><div class="panel records-panel"><div class="section-heading"><div><p class="panel-label">PERSONER</p><h2>Kontaktpersoner</h2></div><button class="text-button" data-open-contact>+ Ny kontakt</button></div><div id="contact-list" class="record-list"></div></div></section>
-
-      <section id="tab-followup" class="tab-panel"><div class="page-heading"><div><p class="eyebrow">RELATIONER</p><h1>Koll på kunder</h1><p>Se vem du ska kontakta och vad nästa steg är.</p></div><button class="primary-button" data-open-customer>+ Ny kund</button></div><div class="followup-filters"><button class="filter-button active" data-follow-filter="all">Alla</button><button class="filter-button" data-follow-filter="overdue">Försenade</button><button class="filter-button" data-follow-filter="soon">Kommande 7 dagar</button><button class="filter-button" data-follow-filter="none">Saknar datum</button></div><div class="panel"><div id="followup-list" class="followup-list"></div></div></section>
-    </main><footer class="site-footer">LEGACY UF <span>•</span> Data sparas lokalt i den här webbläsaren.</footer>
+  <div id="auth-overlay" class="auth-overlay" aria-hidden="false">
+    <div class="auth-box" role="dialog" aria-labelledby="auth-title">
+      <p class="auth-brand">LEGACY <span>UF</span></p>
+      <h2 id="auth-title">Ange kod för åtkomst</h2>
+      <p>Skriv in koden för att visa CRM-systemet.</p>
+      <input id="auth-input" type="password" placeholder="Kod" aria-label="Kod" />
+      <button id="auth-submit" class="primary-button">Öppna CRM</button>
+      <p id="auth-message" class="auth-message" aria-live="polite"></p>
+      <p class="auth-note">Klient-sidigt skydd – använd inte för känsliga uppgifter.</p>
+    </div>
   </div>
 
-  <dialog id="customer-dialog" class="crm-dialog"><form id="customer-form" method="dialog"><div class="dialog-heading"><div><p class="panel-label">FÖRETAG</p><h2 id="customer-dialog-title">Ny kund</h2></div><button type="button" class="close-button" data-close-dialog>×</button></div><input type="hidden" id="edit-customer-id" /><div class="form-grid"><label>Företagsnamn *<input id="customer-name" required maxlength="100" placeholder="Exempel AB" /></label><label>Organisationsnummer<input id="customer-org" maxlength="30" placeholder="556000-0000" /></label><label>E-post<input id="customer-email" type="email" maxlength="120" placeholder="info@exempel.se" /></label><label>Telefon<input id="customer-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label><label>Status<select id="customer-status"><option value="lead">Lead</option><option value="active">Aktiv</option><option value="paused">Pausad</option><option value="won">Kund</option></select></label><label>Nästa uppföljning<input id="customer-followup" type="date" /></label><label class="full-width">Kundvärde (kr)<input id="customer-value" type="number" min="0" step="1" placeholder="0" /></label><label class="full-width">Anteckningar<textarea id="customer-notes" rows="4" maxlength="1000" placeholder="Skriv viktiga anteckningar..."></textarea></label><label class="full-width">Företagslogotyp<input id="customer-logo" type="file" accept="image/*" /><small class="field-help">Logotypen sparas lokalt i webbläsaren.</small></label></div><div class="dialog-actions"><button type="button" class="secondary-button" data-close-dialog>Avbryt</button><button class="primary-button" type="submit">Spara kund</button></div></form></dialog>
+  <div id="site-content" class="site-hidden" aria-hidden="true">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#overview"><span class="brand-mark">L</span><span><b>LEGACY</b><small>UF</small></span></a>
+        <nav class="main-nav" aria-label="Huvudmeny">
+          <button class="tab-button active" data-tab="overview">Översikt</button>
+          <button class="tab-button" data-tab="customers">Kunder</button>
+          <button class="tab-button" data-tab="followup">Koll på kunder</button>
+        </nav>
+        <div class="header-actions">
+          <label class="upload-bg">Bakgrund<input id="bg-input" type="file" accept="image/*" /></label>
+          <button id="clear-bg" class="icon-button" title="Återställ bakgrund">↺</button>
+        </div>
+      </div>
+    </header>
 
-  <dialog id="contact-dialog" class="crm-dialog"><form id="contact-form" method="dialog"><div class="dialog-heading"><div><p class="panel-label">KONTAKTPERSON</p><h2 id="contact-dialog-title">Ny kontaktperson</h2></div><button type="button" class="close-button" data-close-dialog>×</button></div><input type="hidden" id="edit-contact-id" /><div class="form-grid"><label>Namn *<input id="contact-name" required maxlength="100" placeholder="Anna Andersson" /></label><label>Kund *<select id="contact-customer" required><option value="">Välj kund</option></select></label><label>E-post<input id="contact-email" type="email" maxlength="120" placeholder="anna@exempel.se" /></label><label>Telefon<input id="contact-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label><label>Roll<input id="contact-role" maxlength="80" placeholder="Inköpschef" /></label></div><div class="dialog-actions"><button type="button" class="secondary-button" data-close-dialog>Avbryt</button><button class="primary-button" type="submit">Spara kontakt</button></div></form></dialog>
-  <script src="script.js?v=crm-4"></script>
-</body></html>
+    <main class="container">
+      <section id="tab-overview" class="tab-panel active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">LEGACY UF / CRM</p>
+            <h1>Din kundöversikt</h1>
+            <p>Allt du behöver för att hålla koll på kunder och relationer.</p>
+          </div>
+          <button class="primary-button" data-open-customer>+ Ny kund</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card"><span id="customer-count">0</span><small>AKTIVA KUNDER</small></div>
+          <div class="stat-card"><span id="contact-count">0</span><small>KONTAKTPERSONER</small></div>
+          <div class="stat-card"><span id="followup-count">0</span><small>ATT FÖLJA UPP</small></div>
+          <div class="stat-card"><span id="value-count">0 kr</span><small>AKTUELLT VÄRDE</small></div>
+        </div>
+
+        <div class="overview-grid">
+          <section class="panel">
+            <div class="section-heading">
+              <div><p class="panel-label">SENASTE</p><h2>Senast tillagda kunder</h2></div>
+              <button class="text-button" data-tab-link="customers">Visa alla →</button>
+            </div>
+            <div id="recent-customers" class="record-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading">
+              <div><p class="panel-label">NÄSTA STEG</p><h2>Kommande uppföljningar</h2></div>
+              <button class="text-button" data-tab-link="followup">Visa alla →</button>
+            </div>
+            <div id="upcoming-followups" class="record-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="tab-customers" class="tab-panel">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">REGISTER</p>
+            <h1>Kunder &amp; kontakter</h1>
+            <p>Hantera företagen och personerna i ditt nätverk.</p>
+          </div>
+          <button class="primary-button" data-open-customer>+ Ny kund</button>
+        </div>
+
+        <div class="toolbar">
+          <input id="search-input" type="search" placeholder="Sök kunder, personer eller e-post..." aria-label="Sök" />
+          <select id="status-filter" aria-label="Filtrera status">
+            <option value="all">Alla statusar</option>
+            <option value="lead">Lead</option>
+            <option value="active">Aktiv</option>
+            <option value="paused">Pausad</option>
+            <option value="won">Kund</option>
+          </select>
+        </div>
+
+        <div class="panel records-panel">
+          <div id="customer-list" class="record-list"></div>
+        </div>
+
+        <div class="panel records-panel">
+          <div class="section-heading">
+            <div><p class="panel-label">PERSONER</p><h2>Kontaktpersoner</h2></div>
+            <button class="text-button" data-open-contact>+ Ny kontakt</button>
+          </div>
+          <div id="contact-list" class="record-list"></div>
+        </div>
+      </section>
+
+      <section id="tab-followup" class="tab-panel">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">RELATIONER</p>
+            <h1>Koll på kunder</h1>
+            <p>Se vem du ska kontakta och vad nästa steg är.</p>
+          </div>
+          <button class="primary-button" data-open-customer>+ Ny kund</button>
+        </div>
+
+        <div class="followup-filters">
+          <button class="filter-button active" data-follow-filter="all">Alla</button>
+          <button class="filter-button" data-follow-filter="overdue">Försenade</button>
+          <button class="filter-button" data-follow-filter="soon">Kommande 7 dagar</button>
+          <button class="filter-button" data-follow-filter="none">Saknar datum</button>
+        </div>
+
+        <div class="panel">
+          <div id="followup-list" class="followup-list"></div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">LEGACY UF <span>•</span> Data sparas lokalt i den här webbläsaren.</footer>
+  </div>
+
+  <dialog id="customer-dialog" class="crm-dialog">
+    <form id="customer-form" method="dialog">
+      <div class="dialog-heading">
+        <div><p class="panel-label">FÖRETAG</p><h2 id="customer-dialog-title">Ny kund</h2></div>
+        <button type="button" class="close-button" data-close-dialog>×</button>
+      </div>
+      <input type="hidden" id="edit-customer-id" />
+
+      <div class="form-grid">
+        <label>Företagsnamn *<input id="customer-name" required maxlength="100" placeholder="Exempel AB" /></label>
+        <label>Organisationsnummer<input id="customer-org" maxlength="30" placeholder="556000-0000" /></label>
+        <label>E-post<input id="customer-email" type="email" maxlength="120" placeholder="info@exempel.se" /></label>
+        <label>Telefon<input id="customer-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label>
+        <label>Status<select id="customer-status"><option value="lead">Lead</option><option value="active">Aktiv</option><option value="paused">Pausad</option><option value="won">Kund</option></select></label>
+        <label>Nästa uppföljning<input id="customer-followup" type="date" /></label>
+        <label class="full-width">Kundvärde (kr)<input id="customer-value" type="number" min="0" step="1" placeholder="0" /></label>
+        <label class="full-width">Anteckningar<textarea id="customer-notes" rows="4" maxlength="1000" placeholder="Skriv viktiga anteckningar..."></textarea></label>
+        <label class="full-width">QR-kod<input id="customer-qr" type="file" accept="image/*" /><small class="field-help">Ladda upp en egen QR-kod. Bilden sparas lokalt i webbläsaren.</small></label>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" data-close-dialog>Avbryt</button>
+        <button class="primary-button" type="submit">Spara kund</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="contact-dialog" class="crm-dialog">
+    <form id="contact-form" method="dialog">
+      <div class="dialog-heading">
+        <div><p class="panel-label">KONTAKTPERSON</p><h2 id="contact-dialog-title">Ny kontaktperson</h2></div>
+        <button type="button" class="close-button" data-close-dialog>×</button>
+      </div>
+      <input type="hidden" id="edit-contact-id" />
+
+      <div class="form-grid">
+        <label>Namn *<input id="contact-name" required maxlength="100" placeholder="Anna Andersson" /></label>
+        <label>Kund *<select id="contact-customer" required><option value="">Välj kund</option></select></label>
+        <label>E-post<input id="contact-email" type="email" maxlength="120" placeholder="anna@exempel.se" /></label>
+        <label>Telefon<input id="contact-phone" type="tel" maxlength="40" placeholder="070-123 45 67" /></label>
+        <label>Roll<input id="contact-role" maxlength="80" placeholder="Inköpschef" /></label>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary-button" data-close-dialog>Avbryt</button>
+        <button class="primary-button" type="submit">Spara kontakt</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="script.js?v=legacy-qr-1"></script>
+</body>
+</html>

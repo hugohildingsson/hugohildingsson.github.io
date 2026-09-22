@@ -21,6 +21,7 @@ data.customers = data.customers.map(customer => ({
   value: Number(customer.value) || 0,
   notes: customer.notes || '',
   logo: customer.logo || '',
+  qr: customer.qr || '',
   createdAt: customer.createdAt || new Date().toISOString()
 }));
 
@@ -34,7 +35,6 @@ data.contacts = data.contacts.map(contact => ({
 }));
 
 let followFilter = 'all';
-
 const saveData = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, char => ({
   '&': '&amp;',
@@ -43,7 +43,6 @@ const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, char => ({
   '"': '&quot;',
   "'": '&#39;'
 }[char]));
-
 const cryptoRandomId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 const statusNames = { lead: 'Lead', active: 'Aktiv', paused: 'Pausad', won: 'Kund' };
 const customerNameById = (id) => data.customers.find(c => c.id === id)?.name || 'Okänd kund';
@@ -121,7 +120,6 @@ function renderCustomerSelect() {
   if (!customerSelect) return;
 
   const selectedValue = customerSelect.value;
-
   customerSelect.innerHTML = '<option value="">Välj kund</option>' + data.customers.map(customer => {
     return `<option value="${escapeHtml(customer.id)}">${escapeHtml(customer.name)}</option>`;
   }).join('');
@@ -136,12 +134,10 @@ function renderCustomersList() {
   const statusFilter = document.getElementById('status-filter')?.value || 'all';
   const customerList = document.getElementById('customer-list');
 
-  let filtered = data.customers.filter(customer => {
+  const filtered = data.customers.filter(customer => {
     const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
     const matchesSearch = `${customer.name} ${customer.org} ${customer.email} ${customer.phone} ${customer.notes}`
-      .toLowerCase()
-      .includes(search);
-
+      .toLowerCase().includes(search);
     return matchesStatus && matchesSearch;
   });
 
@@ -152,6 +148,7 @@ function renderCustomersList() {
       <article class="record">
         <div class="record-main">
           ${customer.logo ? `<img class="record-logo" src="${escapeHtml(customer.logo)}" alt="Logotyp för ${escapeHtml(customer.name)}" />` : ''}
+          ${customer.qr ? `<button class="qr-mini" data-qr-customer="${escapeHtml(customer.id)}" title="Visa QR-kod">QR</button>` : ''}
           <div>
             <h3>${escapeHtml(customer.name)} ${statusBadge(customer.status)}</h3>
             <p>${escapeHtml(customer.org || 'Org.nr saknas')} · ${escapeHtml(customer.email || 'Ingen e-post')} · ${escapeHtml(customer.phone || 'Inget telefonnummer')}</p>
@@ -171,7 +168,7 @@ function renderContactsList() {
   const search = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
   const contactList = document.getElementById('contact-list');
 
-  let filtered = data.contacts.filter(contact => {
+  const filtered = data.contacts.filter(contact => {
     const haystack = `${contact.name} ${contact.email} ${contact.role} ${customerNameById(contact.customerId)}`.toLowerCase();
     return haystack.includes(search);
   });
@@ -204,6 +201,7 @@ function renderRecentCustomers() {
       <article class="record">
         <div class="record-main">
           ${customer.logo ? `<img class="record-logo" src="${escapeHtml(customer.logo)}" alt="Logotyp för ${escapeHtml(customer.name)}" />` : ''}
+          ${customer.qr ? `<button class="qr-mini" data-qr-customer="${escapeHtml(customer.id)}" title="Visa QR-kod">QR</button>` : ''}
           <div>
             <h3>${escapeHtml(customer.name)} ${statusBadge(customer.status)}</h3>
             <p>${escapeHtml(customer.email || 'Ingen e-post')} · ${escapeHtml(customer.phone || 'Inget telefonnummer')}</p>
@@ -269,6 +267,7 @@ function renderFollowUpList() {
           <div class="followup-item ${className}">
             <div class="record-main">
               ${customer.logo ? `<img class="record-logo" src="${escapeHtml(customer.logo)}" alt="Logotyp för ${escapeHtml(customer.name)}" />` : ''}
+              ${customer.qr ? `<button class="qr-mini" data-qr-customer="${escapeHtml(customer.id)}" title="Visa QR-kod">QR</button>` : ''}
               <div>
                 <h3>${escapeHtml(customer.name)} ${statusBadge(customer.status)}</h3>
                 <p class="date-note">${escapeHtml(customer.notes || 'Ingen anteckning')}</p>
@@ -340,6 +339,31 @@ function openContactDialog(contact = null) {
   dialog.showModal();
 }
 
+function showQr(customerId) {
+  const customer = data.customers.find(c => c.id === customerId);
+  if (!customer || !customer.qr) return;
+
+  const existing = document.getElementById('qr-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'qr-modal';
+  modal.className = 'qr-modal';
+  modal.innerHTML = `
+    <div class="qr-modal-card">
+      <button class="close-button" data-close-qr>×</button>
+      <h3>${escapeHtml(customer.name)}</h3>
+      <div class="qr-preview"><img src="${escapeHtml(customer.qr)}" alt="QR-kod för ${escapeHtml(customer.name)}" /></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('[data-close-qr]').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) modal.remove();
+  });
+}
+
 document.querySelectorAll('[data-open-customer]').forEach(button => {
   button.addEventListener('click', () => openCustomerDialog());
 });
@@ -377,7 +401,7 @@ document.getElementById('customer-form')?.addEventListener('submit', async (even
 
   const customerId = document.getElementById('edit-customer-id').value;
   const existingCustomer = data.customers.find(c => c.id === customerId);
-  const file = document.getElementById('customer-logo').files[0];
+  const qrFile = document.getElementById('customer-qr').files[0];
 
   const customer = {
     id: existingCustomer ? existingCustomer.id : cryptoRandomId(),
@@ -390,11 +414,12 @@ document.getElementById('customer-form')?.addEventListener('submit', async (even
     value: Number(document.getElementById('customer-value').value || 0),
     notes: document.getElementById('customer-notes').value.trim(),
     createdAt: existingCustomer ? existingCustomer.createdAt : new Date().toISOString(),
-    logo: existingCustomer?.logo || ''
+    logo: existingCustomer?.logo || '',
+    qr: existingCustomer?.qr || ''
   };
 
-  if (file) {
-    customer.logo = await fileToDataUrl(file);
+  if (qrFile) {
+    customer.qr = await fileToDataUrl(qrFile);
   }
 
   if (existingCustomer) {
@@ -439,6 +464,7 @@ document.addEventListener('click', (event) => {
   const deleteCustomerButton = event.target.closest('[data-delete-customer]');
   const editContactButton = event.target.closest('[data-edit-contact]');
   const deleteContactButton = event.target.closest('[data-delete-contact]');
+  const qrButton = event.target.closest('[data-qr-customer]');
 
   if (editCustomerButton) {
     const customer = data.customers.find(c => c.id === editCustomerButton.dataset.editCustomer);
@@ -467,6 +493,10 @@ document.addEventListener('click', (event) => {
       saveData();
       render();
     }
+  }
+
+  if (qrButton) {
+    showQr(qrButton.dataset.qrCustomer);
   }
 });
 
